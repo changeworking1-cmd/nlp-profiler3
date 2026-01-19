@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="NLP Metaprogramme Profiler - Predict behaviours and unlock communication strategies">
+    <meta name="author" content="Change Working - Alan Johnson">
+    <meta name="theme-color" content="#8B2635">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NLP Profiler">
+    <title>NLP Metaprogramme Profiler | Change Working</title>
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
+    
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            -webkit-font-smoothing: antialiased;
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #8B2635; border-radius: 4px; }
+        input[type="text"], input[type="radio"] { font-size: 16px; }
+        input[type="radio"] { min-width: 20px; min-height: 20px; }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif;">
+            <div style="text-align: center;">
+                <h1 style="color: #8B2635; font-size: 2em; margin-bottom: 1em;">Loading NLP Profiler...</h1>
+                <p style="color: #666;">Please wait while the app loads</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Load React and dependencies FIRST -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Then our component code -->
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+
+const MetaprogrammeProfiler = () => {
+  const [mode, setMode] = useState('choice'); // 'choice', 'questionnaire', 'expert'
+  const [profile, setProfile] = useState({
+    name: '',
+    direction: '',
+    reference: '',
+    scope: '',
+    sorting: '',
+    timeOrientation: '',
+    primaryRep: '',
+    motivation: '',
+    action: '',
+    decisionMaking: '',
+    rules: '',
+    response: ''
+  });
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [randomizedQuestions, setRandomizedQuestions] = useState([]);
+  const [showResults, setShowResults] = useState(false);
+
+  // Questionnaire questions - 2-3 per metaprogramme
+  const questions = {
+    direction: [
+      {
+        question: "When thinking about a new opportunity, what comes to mind first?",
+        options: [
+          { value: 'towards', text: "What I could achieve and the possibilities it opens up" },
+          { value: 'away-from', text: "What issues might arise and how to handle them" }
+        ]
+      },
+      {
+        question: "When planning your day, you typically think about:",
+        options: [
+          { value: 'towards', text: "What you want to accomplish and get done" },
+          { value: 'away-from', text: "Making sure nothing gets missed or goes wrong" }
+        ]
+      },
+      {
+        question: "What motivates you most to take action?",
+        options: [
+          { value: 'towards', text: "Getting closer to something I want" },
+          { value: 'away-from', text: "Sorting out something that's not working" }
+        ]
+      }
+    ],
+    reference: [
+      {
+        question: "When you've done a good job, you know because:",
+        options: [
+          { value: 'internal', text: "You feel satisfied with it internally" },
+          { value: 'external', text: "Others give you positive feedback" }
+        ]
+      },
+      {
+        question: "When making an important decision, do you:",
+        options: [
+          { value: 'internal', text: "Trust your own judgement primarily" },
+          { value: 'external', text: "Seek input and validation from others" }
+        ]
+      },
+      {
+        question: "How important is external recognition to you?",
+        options: [
+          { value: 'internal', text: "Nice to have, but I know my own worth" },
+          { value: 'external', text: "Very important - it confirms I'm on the right track" }
+        ]
+      }
+    ],
+    scope: [
+      {
+        question: "When learning something new, you prefer to start with:",
+        options: [
+          { value: 'big-picture', text: "The overview and main concepts" },
+          { value: 'detail', text: "Specific steps and detailed instructions" }
+        ]
+      },
+      {
+        question: "In meetings, you're more likely to:",
+        options: [
+          { value: 'big-picture', text: "Talk about strategy and the bigger picture" },
+          { value: 'detail', text: "Focus on specific details and sequences" }
+        ]
+      },
+      {
+        question: "When explaining something, you tend to:",
+        options: [
+          { value: 'big-picture', text: "Give the concept and context first" },
+          { value: 'detail', text: "Explain step-by-step in sequence" }
+        ]
+      }
+    ],
+    sorting: [
+      {
+        question: "When someone shares an idea with you, you naturally:",
+        options: [
+          { value: 'matcher', text: "Think about how it connects to what you already know" },
+          { value: 'mismatcher', text: "Notice what makes it unique or different" }
+        ]
+      },
+      {
+        question: "In discussions, you find yourself:",
+        options: [
+          { value: 'matcher', text: "Building on what's been said with 'yes, and...'" },
+          { value: 'mismatcher', text: "Pointing out alternative perspectives with 'but what about...'" }
+        ]
+      }
+    ],
+    timeOrientation: [
+      {
+        question: "How do you experience time in your daily life?",
+        options: [
+          { value: 'in-time', text: "Time flows - I'm often surprised where the day went" },
+          { value: 'through-time', text: "Time is structured - I can visualise my schedule clearly" }
+        ]
+      },
+      {
+        question: "When planning your week, you:",
+        options: [
+          { value: 'in-time', text: "Keep it flexible and adapt as things come up" },
+          { value: 'through-time', text: "Map it out in advance with clear timelines" }
+        ]
+      },
+      {
+        question: "If a meeting overruns by 30 minutes, you:",
+        options: [
+          { value: 'in-time', text: "Don't mind much - time is fluid" },
+          { value: 'through-time', text: "Feel frustrated - it disrupts your schedule" }
+        ]
+      }
+    ],
+    primaryRep: [
+      {
+        question: "When learning something new, you prefer to:",
+        options: [
+          { value: 'visual', text: "See diagrams, charts, or demonstrations" },
+          { value: 'auditory', text: "Have someone explain it verbally" },
+          { value: 'kinaesthetic', text: "Try it hands-on yourself" }
+        ]
+      },
+      {
+        question: "When recalling a past event, you're most likely to remember:",
+        options: [
+          { value: 'visual', text: "What it looked like - the visual scene" },
+          { value: 'auditory', text: "What was said - the conversations" },
+          { value: 'kinaesthetic', text: "How it felt - the physical sensations" }
+        ]
+      },
+      {
+        question: "Which phrase sounds most like you?",
+        options: [
+          { value: 'visual', text: "'I see what you mean'" },
+          { value: 'auditory', text: "'That sounds good to me'" },
+          { value: 'kinaesthetic', text: "'I can get a handle on that'" }
+        ]
+      }
+    ],
+    motivation: [
+      {
+        question: "What drives you most in your work?",
+        options: [
+          { value: 'power', text: "Having influence and control over outcomes" },
+          { value: 'affiliation', text: "Building relationships and team harmony" },
+          { value: 'achievement', text: "Hitting goals and achieving results" }
+        ]
+      },
+      {
+        question: "Your ideal work environment involves:",
+        options: [
+          { value: 'power', text: "Having authority and being consulted" },
+          { value: 'affiliation', text: "Collaboration and strong team connections" },
+          { value: 'achievement', text: "Clear targets and measurable success" }
+        ]
+      }
+    ],
+    action: [
+      {
+        question: "When you notice something needs doing, you typically:",
+        options: [
+          { value: 'proactive', text: "Get on with it straight away" },
+          { value: 'reactive', text: "Think about the best approach first" }
+        ]
+      },
+      {
+        question: "In unfamiliar situations, your natural tendency is to:",
+        options: [
+          { value: 'proactive', text: "Take the lead and try things out" },
+          { value: 'reactive', text: "Observe how things work before getting involved" }
+        ]
+      },
+      {
+        question: "When faced with a challenge, you're more likely to:",
+        options: [
+          { value: 'proactive', text: "Jump in and figure it out as you go" },
+          { value: 'reactive', text: "Consider different angles before acting" }
+        ]
+      }
+    ],
+    decisionMaking: [
+      {
+        question: "When solving a problem, you prefer:",
+        options: [
+          { value: 'options', text: "Having multiple alternatives to choose from" },
+          { value: 'procedures', text: "Following a clear, proven process" }
+        ]
+      },
+      {
+        question: "You feel most comfortable when:",
+        options: [
+          { value: 'options', text: "You have flexibility and choices" },
+          { value: 'procedures', text: "You have clear steps and procedures" }
+        ]
+      },
+      {
+        question: "When learning a new software, you:",
+        options: [
+          { value: 'options', text: "Explore different ways to achieve the result" },
+          { value: 'procedures', text: "Follow the manual or tutorial step-by-step" }
+        ]
+      }
+    ],
+    rules: [
+      {
+        question: "When it comes to rules and standards:",
+        options: [
+          { value: 'my-rules-me-your-rules-you', text: "I follow my standards, you follow yours" },
+          { value: 'my-my', text: "There's a right way - everyone should follow it" },
+          { value: 'no-rules-me-my-rules-you', text: "I'm flexible, but others should follow rules" },
+          { value: 'my-i-dont-know', text: "I know my standards, but I'm unsure about others'" }
+        ]
+      },
+      {
+        question: "How do you feel about workplace procedures?",
+        options: [
+          { value: 'my-rules-me-your-rules-you', text: "Different approaches work for different people" },
+          { value: 'my-my', text: "We should all follow the same high standards" },
+          { value: 'no-rules-me-my-rules-you', text: "Others need structure, I don't" },
+          { value: 'my-i-dont-know', text: "I have my way, not sure about others" }
+        ]
+      }
+    ],
+    response: [
+      {
+        question: "When making important decisions, you rely more on:",
+        options: [
+          { value: 'emotional', text: "How it feels - your gut and emotions" },
+          { value: 'logical', text: "Logic and data - rational analysis" },
+          { value: 'choice', text: "It depends - sometimes feelings, sometimes logic" }
+        ]
+      },
+      {
+        question: "In a heated discussion, you tend to:",
+        options: [
+          { value: 'emotional', text: "Lead with feelings and emotional response" },
+          { value: 'logical', text: "Focus on facts and logical arguments" },
+          { value: 'choice', text: "Adapt based on the situation" }
+        ]
+      },
+      {
+        question: "When someone asks your opinion, you typically:",
+        options: [
+          { value: 'emotional', text: "Share how you feel about it first" },
+          { value: 'logical', text: "Present the logical analysis first" },
+          { value: 'choice', text: "Depends on the context and person" }
+        ]
+      }
+    ]
+  };
+
+  // Expert mode - metaprogramme options
+  const metaprogrammes = {
+    direction: {
+      label: 'Motivation Direction',
+      options: [
+        { value: 'towards', label: 'Towards', desc: 'Motivated by goals and gains' },
+        { value: 'away-from', label: 'Away From', desc: 'Motivated by avoiding problems' }
+      ]
+    },
+    reference: {
+      label: 'Reference Frame',
+      options: [
+        { value: 'internal', label: 'Internal Reference', desc: 'Decides based on own judgement' },
+        { value: 'external', label: 'External Reference', desc: 'Needs validation from others' }
+      ]
+    },
+    scope: {
+      label: 'Scope of Focus',
+      options: [
+        { value: 'big-picture', label: 'Big Picture', desc: 'Sees the overview and concepts' },
+        { value: 'detail', label: 'Detail', desc: 'Focuses on specifics and sequences' }
+      ]
+    },
+    sorting: {
+      label: 'Relationship Sorting',
+      options: [
+        { value: 'matcher', label: 'Matcher', desc: 'Looks for similarities and common ground' },
+        { value: 'mismatcher', label: 'Mismatcher', desc: 'Spots differences and exceptions' }
+      ]
+    },
+    timeOrientation: {
+      label: 'Time Orientation',
+      options: [
+        { value: 'in-time', label: 'In Time', desc: 'Lives in the moment, time is fluid' },
+        { value: 'through-time', label: 'Through Time', desc: 'Sees time linearly, plans ahead' }
+      ]
+    },
+    primaryRep: {
+      label: 'Primary Representational System',
+      options: [
+        { value: 'visual', label: 'Visual', desc: 'Thinks in pictures and images' },
+        { value: 'auditory', label: 'Auditory', desc: 'Thinks in sounds and words' },
+        { value: 'kinaesthetic', label: 'Kinaesthetic', desc: 'Thinks in feelings and sensations' }
+      ]
+    },
+    motivation: {
+      label: 'Motivation Pattern',
+      options: [
+        { value: 'power', label: 'Power', desc: 'Driven by control and influence' },
+        { value: 'affiliation', label: 'Affiliation', desc: 'Driven by relationships and belonging' },
+        { value: 'achievement', label: 'Achievement', desc: 'Driven by goals and success' }
+      ]
+    },
+    action: {
+      label: 'Action Pattern',
+      options: [
+        { value: 'proactive', label: 'Proactive', desc: 'Takes initiative, makes things happen' },
+        { value: 'reactive', label: 'Reactive', desc: 'Waits, analyses, then responds' }
+      ]
+    },
+    decisionMaking: {
+      label: 'Decision Making Style',
+      options: [
+        { value: 'options', label: 'Options', desc: 'Wants choices and alternatives' },
+        { value: 'procedures', label: 'Procedures', desc: 'Wants clear steps and processes' }
+      ]
+    },
+    rules: {
+      label: 'Rule Orientation',
+      options: [
+        { value: 'my-rules-me-your-rules-you', label: 'My Rules for Me / Your Rules for You', desc: 'I do my thing, you do yours' },
+        { value: 'my-my', label: 'My / My', desc: 'Everyone should follow my standards' },
+        { value: 'no-rules-me-my-rules-you', label: 'No Rules for Me / My Rules for You', desc: 'Rules are for other people' },
+        { value: 'my-i-dont-know', label: 'My / I Don\'t Know', desc: 'I know what I want, but uncertain about others' }
+      ]
+    },
+    response: {
+      label: 'Response Style',
+      options: [
+        { value: 'emotional', label: 'Emotional', desc: 'Leads with feelings' },
+        { value: 'logical', label: 'Logical', desc: 'Leads with thinking' },
+        { value: 'choice', label: 'Choice', desc: 'Balanced, context-dependent' }
+      ]
+    }
+  };
+
+  // Initialize randomized questions on mount
+  useEffect(() => {
+    if (mode === 'questionnaire') {
+      randomizeQuestions();
+    }
+  }, [mode]);
+
+  const randomizeQuestions = () => {
+    // Flatten all questions and shuffle
+    const allQuestions = [];
+    Object.entries(questions).forEach(([metaprogramme, questionList]) => {
+      // Pick 2-3 random questions per metaprogramme
+      const shuffled = [...questionList].sort(() => Math.random() - 0.5);
+      const selected = shuffled.slice(0, 2 + Math.floor(Math.random() * 2)); // 2 or 3 questions
+      
+      selected.forEach(q => {
+        allQuestions.push({
+          ...q,
+          metaprogramme: metaprogramme
+        });
+      });
+    });
+    
+    // Shuffle all questions
+    const shuffled = allQuestions.sort(() => Math.random() - 0.5);
+    setRandomizedQuestions(shuffled);
+    setCurrentQuestionIndex(0);
+  };
+
+  const handleQuestionAnswer = (metaprogramme, value) => {
+    setProfile(prev => ({ ...prev, [metaprogramme]: value }));
+    
+    if (currentQuestionIndex < randomizedQuestions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    } else {
+      // All questions answered
+      setShowResults(true);
+    }
+  };
+
+  const generateNarrativeSummary = () => {
+    const parts = [];
+    const name = profile.name || "This person";
+    
+    // Start with direction and action
+    if (profile.direction && profile.action) {
+      const directionText = profile.direction === 'towards' ? 
+        "naturally drawn to what they want to achieve" :
+        "instinctively focused on spotting and preventing problems";
+      const actionText = profile.action === 'proactive' ?
+        "they're already moving before you've finished explaining" :
+        "they prefer to think things through carefully before acting";
+        
+      parts.push(`${name} is ${directionText}, and ${actionText}.`);
+    }
+    
+    // Add reference frame and scope
+    if (profile.reference && profile.scope) {
+      const refText = profile.reference === 'internal' ?
+        "They trust their own judgement" :
+        "They value external feedback and confirmation";
+      const scopeText = profile.scope === 'big-picture' ?
+        "seeing patterns and connections across the landscape" :
+        "tracking the details and sequences that others might miss";
+        
+      parts.push(`${refText}, ${scopeText}.`);
+    }
+    
+    // Add sorting and response
+    if (profile.sorting && profile.response) {
+      const sortText = profile.sorting === 'matcher' ?
+        "In conversations, they build bridges between ideas, finding common ground and similarity" :
+        "In conversations, they spot what's different, questioning assumptions and finding exceptions";
+      const responseText = profile.response === 'emotional' ?
+        "leading with how things feel" :
+        profile.response === 'logical' ?
+        "leading with data and logic" :
+        "flexing between head and heart depending on context";
+        
+      parts.push(`${sortText}, whilst ${responseText}.`);
+    }
+    
+    // Add decision making and time
+    if (profile.decisionMaking && profile.timeOrientation) {
+      const decisionText = profile.decisionMaking === 'options' ?
+        "they love having choices and alternative routes" :
+        "they feel most comfortable with clear procedures and proven processes";
+      const timeText = profile.timeOrientation === 'in-time' ?
+        "They experience time as fluid, present in each moment" :
+        "They see time laid out before them, structured and planned";
+        
+      parts.push(`When solving problems, ${decisionText}. ${timeText}.`);
+    }
+    
+    // Add primary rep and motivation
+    if (profile.primaryRep && profile.motivation) {
+      const repText = profile.primaryRep === 'visual' ?
+        "show them - they think in pictures" :
+        profile.primaryRep === 'auditory' ?
+        "talk it through - they process by hearing" :
+        "let them experience it - they need hands-on understanding";
+      const motText = profile.motivation === 'power' ?
+        "driven by influence and control" :
+        profile.motivation === 'affiliation' ?
+        "driven by connection and belonging" :
+        "driven by achievement and results";
+        
+      parts.push(`To communicate effectively, ${repText}. They're ${motText}.`);
+    }
+    
+    return parts.length > 0 ? parts.join(' ') : 
+      "Complete all questions to see the full narrative profile.";
+  };
+
+  const generateProfile = () => {
+    const behaviours = [];
+    const communications = [];
+    const stressors = [];
+    const leadership = [];
+    const randomPick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+    // Motivation Direction
+    if (profile.direction === 'towards') {
+      behaviours.push(randomPick([
+        "Eyes on the prize. They talk about what they want to achieve, gain, and accomplish. 'Imagine when we succeed' gets them energised.",
+        "Goal-getters who light up when discussing possibilities and wins. They're drawn to what's ahead like a magnet.",
+        "Forward-focused enthusiasts. Ask them about problems and they'll pivot to opportunities. That's just how their brain works.",
+        "Achievement-oriented thinkers who frame everything as progress towards something better. The glass isn't half full - it's filling up."
+      ]));
+      communications.push(randomPick([
+        "Paint the positive picture. Show them what they'll gain, achieve, and move towards. 'Here's what we'll get' beats 'here's what we'll avoid'.",
+        "Lead with the upside. 'This takes us closer to...' resonates far more than 'This prevents...'",
+        "Frame everything as advancement. They want to know what they're moving towards, not what they're moving away from.",
+        "Speak their language of goals and gains. 'We'll achieve X' works better than 'We'll avoid Y'."
+      ]));
+      stressors.push(randomPick([
+        "Constant focus on problems and what could go wrong (they'll lose steam fast)",
+        "Doom-scrolling through worst-case scenarios and risk registers",
+        "People who can only see obstacles instead of opportunities",
+        "Being stuck in 'what if it fails' conversations when they want to discuss 'when we succeed'"
+      ]));
+      leadership.push(randomPick([
+        "Inspirational and goal-focused. Creates compelling visions of success. May overlook potential problems in their enthusiasm.",
+        "Rallies the troops around a shared destination. Just make sure someone on the team is checking for potholes.",
+        "Natural motivator who paints exciting futures. Balance them with a detail person who spots the risks.",
+        "Vision-caster who gets people excited about where they're going. May need a co-pilot who watches for icebergs."
+      ]));
+    } else if (profile.direction === 'away-from') {
+      behaviours.push(randomPick([
+        "Problem-spotters extraordinaire. They notice what's wrong, what needs fixing, and what to avoid. Natural risk assessors.",
+        "The canary in the coal mine - spots danger before others do. Brilliant at identifying what could go sideways.",
+        "Risk-aware realists who see the cracks in the plan. They're not pessimists, they're preparing for reality.",
+        "Alert to threats and issues like a smoke detector. They'll find the problem everyone else missed."
+      ]));
+      communications.push(randomPick([
+        "Highlight what they'll prevent, solve, or avoid. 'This stops the problem' resonates more than 'this creates opportunity'.",
+        "Show them the risks you're mitigating. 'This prevents X going wrong' speaks their language.",
+        "Lead with problem-solving. 'Here's what this fixes' lands better than 'Here's what this creates'.",
+        "Frame in terms of protection and prevention. They want to know what you're guarding against."
+      ]));
+      stressors.push(randomPick([
+        "Being told they're 'too negative' when they're just being realistic about risks",
+        "Blind optimism and people who won't acknowledge potential problems",
+        "'Just think positive' cheerleaders who dismiss their valid concerns",
+        "Being labelled a pessimist when they're actually being thorough"
+      ]));
+      leadership.push(randomPick([
+        "Excellent at risk management and preventing disasters. Team appreciates their thoroughness. May need balancing with positive vision.",
+        "The team's insurance policy. Spots what could go wrong before it does. Pair with someone who brings the optimism.",
+        "Protects the team from preventable disasters. Just ensure they're balanced with forward-focused thinking.",
+        "Risk-management specialist who keeps everyone safe. May need help celebrating wins instead of hunting for next problem."
+      ]));
+    }
+
+    // Reference Frame
+    if (profile.reference === 'internal') {
+      behaviours.push(randomPick([
+        "Knows what they think. Makes decisions based on their own judgement. Doesn't need your approval (or anyone else's).",
+        "Self-referencing decision-maker. They've got their own compass and trust it implicitly.",
+        "Inner-directed thinker who checks in with themselves first. External opinions are interesting but not decisive.",
+        "Answers to their own counsel. You can share your view, but they'll decide based on their internal gauge."
+      ]));
+      communications.push(randomPick([
+        "Ask 'What do you think?' rather than 'What does everyone else think?'. They trust their own counsel.",
+        "Invite their opinion and respect their judgement. Don't lean on 'best practice' or 'everyone's doing it'.",
+        "Give them autonomy to decide. They're checking their internal compass, not the external consensus.",
+        "Present information and let them conclude. They're least persuaded by 'others think' arguments."
+      ]));
+      stressors.push(randomPick([
+        "Being asked to do things purely because 'everyone else is' or 'it's best practice'",
+        "Pressure to conform to groupthink or follow the herd",
+        "'Trust me' appeals without logic or substance",
+        "Being told what to think rather than being given space to form their own view"
+      ]));
+      leadership.push(randomPick([
+        "Confident decision-maker who trusts their judgement. Won't be swayed by groupthink. May need reminding that others' input has value too.",
+        "Independent thinker who won't follow the crowd. Strong leadership presence. Just remember the team has wisdom too.",
+        "Doesn't need validation to make calls. Decisive and self-assured. Balance with genuine listening to others.",
+        "Self-directed leader who backs their own decisions. Refreshingly unswayed by politics. Don't let it tip into ignoring good advice."
+      ]));
+    } else if (profile.reference === 'external') {
+      behaviours.push(randomPick([
+        "Seeks validation and feedback. 'What do you think?' and 'Did I do this right?' are common refrains.",
+        "Values external input and confirmation. They're checking: 'Am I on the right track?'",
+        "Looks outward for guidance and reassurance. Feedback isn't nice-to-have, it's essential.",
+        "Calibrates against others' views and standards. They genuinely want to know how they're doing."
+      ]));
+      communications.push(randomPick([
+        "Provide clear feedback and external validation. They genuinely want to know if they're on track.",
+        "Give regular check-ins and confirmation. They need to know they're meeting expectations.",
+        "Be explicit with feedback - positive and corrective. Silence reads as 'something's wrong'.",
+        "Offer benchmarks and external measures. They want to know how they stack up."
+      ]));
+      stressors.push(randomPick([
+        "Lack of feedback, unclear expectations, or having to decide without external input",
+        "Radio silence when they're seeking confirmation or guidance",
+        "Ambiguity about whether they're meeting the standard",
+        "Being left to 'just figure it out' without any external reference points"
+      ]));
+      leadership.push(randomPick([
+        "Values team input and seeks consensus. Creates inclusive environment. May struggle with decisions when stakeholder views conflict.",
+        "Consultative leader who genuinely wants input. Builds buy-in naturally. May over-rely on consensus.",
+        "Creates collaborative culture where voices are heard. Just needs support when opinions diverge.",
+        "Seeks team wisdom before deciding. Inclusive and democratic. May need help with unpopular-but-necessary calls."
+      ]));
+    }
+
+    // Scope of Focus
+    if (profile.scope === 'big-picture') {
+      behaviours.push(randomPick([
+        "Sees the forest, not the trees. Loves strategy, concepts, and the 30,000-foot view. Details are for other people.",
+        "Strategic thinker who grasps the whole system at a glance. Ask them about step 3 and they'll talk about the destination.",
+        "Conceptual mind that connects dots across the landscape. The devil's in the details? They're not interested in meeting him.",
+        "High-altitude perspective. They see patterns and connections whilst others are counting trees."
+      ]));
+      communications.push(randomPick([
+        "Start with the overview. Give them the concept before drowning them in the details (which they'll glaze over anyway).",
+        "Lead with 'here's the big idea' then offer details if needed. Don't bury the headline in minutiae.",
+        "Frame the context and direction first. They need to see where this fits before they'll care about the specifics.",
+        "Paint the strategic picture. Once they get the concept, they'll ask for details if they need them."
+      ]));
+      stressors.push(randomPick([
+        "Being forced to focus on minute details and step-by-step sequences",
+        "Instruction manuals, detailed procedures, and being asked to 'just follow these 47 steps'",
+        "People who can't summarise and insist on explaining every minor point",
+        "Getting lost in the weeds when they can see the destination clearly"
+      ]));
+      leadership.push(randomPick([
+        "Strategic visionary. Connects dots others miss. Needs detail-oriented people on their team to actually implement their brilliant ideas.",
+        "Sees the bigger game being played. Inspiring strategist. Pair with someone who sweats the details.",
+        "Master of the 30,000-foot view. Sets clear direction. Just ensure the team includes detail people for execution.",
+        "Context-builder who helps team understand 'why'. Balance with implementers who handle 'how'."
+      ]));
+    } else if (profile.scope === 'detail') {
+      behaviours.push(randomPick([
+        "Loves the specifics. Will notice the typo on slide 23. Can tell you the exact sequence of events.",
+        "Detail-focused processor. They remember the specific numbers, dates, and exact wording.",
+        "Precision-oriented thinker who tracks the sequence and specifics. They'll spot the inconsistency everyone else missed.",
+        "Sequential mind that follows the thread through each step. They know exactly how we got here."
+      ]));
+      communications.push(randomPick([
+        "Give them the details. Specific steps, clear sequences, and concrete examples make them happy.",
+        "Be precise and sequential. They want to know the specifics, not vague overviews.",
+        "Provide the step-by-step. Hand-waving and 'roughly speaking' doesn't cut it.",
+        "Lead with facts, figures, and specifics. They're allergic to woolly generalisations."
+      ]));
+      stressors.push(randomPick([
+        "Vague instructions and 'just get the gist of it' approaches",
+        "Strategic waffle without concrete specifics or clear steps",
+        "Being told to 'not worry about the details' when the details matter",
+        "Leaders who speak only in vision-statements without practical steps"
+      ]));
+      leadership.push(randomPick([
+        "Thorough and precise. Nothing falls through the cracks. May need help seeing how their work fits the bigger strategic picture.",
+        "Quality-focused implementer. Ensures accuracy and completeness. Benefit from regular strategic context.",
+        "Detail excellence. Team knows exactly what's expected. Help them zoom out occasionally.",
+        "Precision driver. Creates clear, accurate work. Support with connecting to broader strategy."
+      ]));
+    }
+
+    // Relationship Sorting
+    if (profile.sorting === 'matcher') {
+      behaviours.push(randomPick([
+        "Spots similarities and common ground. 'Yes, and...' is their natural response. Builds bridges between ideas.",
+        "Connection-maker who finds what's alike. They're building on your point before you've finished making it.",
+        "Similarity-seeker. 'That's like when...' and 'this reminds me of...' are their natural patterns.",
+        "Agreement-finder who spots the common threads. They're weaving ideas together naturally."
+      ]));
+      communications.push(randomPick([
+        "Show how things align and connect. 'This is similar to...' helps them understand new concepts.",
+        "Build on common ground. They respond to 'yes, and' far better than 'yes, but'.",
+        "Connect new ideas to familiar ones. They learn through analogy and similarity.",
+        "Frame in terms of what matches their experience. They integrate through connection."
+      ]));
+      stressors.push(randomPick([
+        "People who only point out differences and constant devil's advocates",
+        "Habitual contrarians and nitpickers who can't see connections",
+        "Those who reflexively disagree before finding common ground",
+        "Environments where pointing out what's wrong is valued over finding what works"
+      ]));
+      leadership.push(randomPick([
+        "Creates consensus and finds common ground. Builds collaborative teams. May downplay important differences in pursuit of harmony.",
+        "Bridge-builder between people and ideas. Unifies teams naturally. Watch they don't smooth over necessary conflicts.",
+        "Consensus-creator who helps diverse views find alignment. May need support addressing genuine disagreements.",
+        "Harmony-maker. Excellent at building coalitions. Just ensure important differences get aired."
+      ]));
+    } else if (profile.sorting === 'mismatcher') {
+      behaviours.push(randomPick([
+        "Spots what's different, wrong, or doesn't fit. 'Yes, but...' is their automatic setting. Quality controllers of the world.",
+        "Difference-detector with a PhD in spotting exceptions. They find the outlier before you finish the pattern.",
+        "Critical eye that notices what others miss. They're not being difficult - they're being thorough.",
+        "Exception-finder. Whilst others nod along, they're noting what doesn't quite fit."
+      ]));
+      communications.push(randomPick([
+        "Acknowledge the differences upfront. 'I know this is different from...' shows you've thought it through.",
+        "Pre-empt their concerns by addressing exceptions. They'll find them anyway - beat them to it.",
+        "Welcome their critical input. They're your quality control, not your enemy.",
+        "Frame exceptions as valuable. 'What am I missing?' invites their natural talent."
+      ]));
+      stressors.push(randomPick([
+        "Being labelled 'difficult' or 'negative' when they're identifying genuine issues",
+        "Cheerleaders who dismiss their valid concerns as 'not being team players'",
+        "Environments where raising problems is seen as pessimism",
+        "Being told to 'stop being so critical' when they're preventing disasters"
+      ]));
+      leadership.push(randomPick([
+        "Excellent at quality control and spotting problems. Saves team from mistakes. May need coaching on when to accept 'good enough'.",
+        "The team's quality assurance. Catches issues before they become disasters. Help them recognise when 80% is sufficient.",
+        "Risk-spotter who prevents problems. Invaluable for complex work. Support with prioritising which battles matter.",
+        "Critical thinker who elevates standards. Just ensure they don't let perfect be the enemy of good."
+      ]));
+    }
+
+    // Continue with remaining metaprogrammes using simpler versions for now
+    // Time Orientation
+    if (profile.timeOrientation === 'in-time') {
+      behaviours.push("Lives spontaneously - you'll find them saying 'where did the time go?' They're brilliant in crises but meetings that overrun don't stress them one bit.");
+      communications.push("Keep it present-focused. 'Right now, what we need is...' works better than 'by next quarter we'll...'");
+      stressors.push("Rigid schedules and long-term planning sessions");
+      leadership.push("Excellent crisis manager - thrives when things go sideways.");
+    } else if (profile.timeOrientation === 'through-time') {
+      behaviours.push("Has a mental Gantt chart for everything. Can tell you what they're doing three Thursdays from now.");
+      communications.push("Give them timelines and milestones. 'Here's the roadmap' is music to their ears.");
+      stressors.push("Last-minute changes and 'we'll figure it out as we go' approaches");
+      leadership.push("Strategic planner extraordinaire. Will have succession plans for their succession plans.");
+    }
+
+    // Primary Rep System
+    if (profile.primaryRep === 'visual') {
+      behaviours.push(randomPick([
+        "Uses phrases like 'I see what you mean' and 'looks good to me'. Probably has Pinterest boards for their Pinterest boards.",
+        "Picture-thinker who needs to see it to get it. They're sketching whilst you're talking.",
+        "Visual processor. 'Show me' works far better than 'tell me'."
+      ]));
+      communications.push(randomPick([
+        "Show them. Diagrams, charts, mind maps - make it visual or watch them glaze over.",
+        "Use visuals. One diagram beats a thousand words with them.",
+        "Sketch it out. Even rough visuals help them process better than detailed descriptions."
+      ]));
+      stressors.push("Long phone calls without visual aids and being asked to 'just imagine it'");
+      leadership.push("Creates clear vision (literally). Loves whiteboards and presentations.");
+    } else if (profile.primaryRep === 'auditory') {
+      behaviours.push(randomPick([
+        "Says things like 'that rings a bell' and 'sounds good'. Actually listens to voicemail all the way through.",
+        "Verbal processor who thinks by talking. They need to hear it.",
+        "Sound-oriented thinker. They remember what was said, not what was shown."
+      ]));
+      communications.push(randomPick([
+        "Talk it through with them. Voice notes > emails for these folks.",
+        "Verbal communication is king. Phone calls work better than written briefs.",
+        "Let them talk it through. They're processing aloud."
+      ]));
+      stressors.push("Noisy environments and being expected to 'just read the memo'");
+      leadership.push("Excellent communicator and listener. Team members actually feel heard.");
+    } else if (profile.primaryRep === 'kinaesthetic') {
+      behaviours.push(randomPick([
+        "Uses 'I feel like' and 'get a handle on this'. Needs to physically do something to understand it.",
+        "Hands-on learner. 'Let me try it' beats 'let me watch it' every time.",
+        "Tactile thinker. They need to experience it to grasp it."
+      ]));
+      communications.push(randomPick([
+        "Let them experience it. Hands-on demos beat PowerPoints every time.",
+        "Get them doing, not just viewing or hearing.",
+        "Physical involvement aids their understanding."
+      ]));
+      stressors.push("Sitting still through endless theoretical discussions");
+      leadership.push("Leads by doing. Their team learns through action, not abstract concepts.");
+    }
+
+    // Motivation
+    if (profile.motivation === 'power') {
+      behaviours.push("Wants to be in charge or at least consulted. Their Zoom name probably includes their full title.");
+      communications.push("Acknowledge their authority and expertise. 'Given your experience with this...' opens doors.");
+      stressors.push("Being micromanaged or having their decisions overruled publicly");
+      leadership.push("Takes charge decisively. Won't shy away from tough calls.");
+    } else if (profile.motivation === 'affiliation') {
+      behaviours.push("Wants everyone to get along. Probably organises the team socials and remembers everyone's birthday.");
+      communications.push("Emphasise team impact. 'This will really help the team' beats 'this will make you look good'.");
+      stressors.push("Conflict, isolation, and being the bad guy (even when necessary)");
+      leadership.push("Builds brilliant team culture. People want to work for them.");
+    } else if (profile.motivation === 'achievement') {
+      behaviours.push("Sets goals for their goals. Has probably read every book on productivity ever written.");
+      communications.push("Show them the finish line. 'Here's what success looks like' gets them moving.");
+      stressors.push("Lack of clear objectives and 'let's just see what happens' approaches");
+      leadership.push("Results-driven and inspiring. Will push team to excel.");
+    }
+
+    // Action Pattern
+    if (profile.action === 'proactive') {
+      behaviours.push(randomPick([
+        "Already three steps ahead. Started the project before you finished explaining it.",
+        "Initiative-taker who doesn't wait for permission. If it needs doing, they're on it.",
+        "Self-starter extraordinaire. Whilst others wait for the go-ahead, they're already moving."
+      ]));
+      communications.push(randomPick([
+        "Give them autonomy and room to run. They'll get it done - probably before the deadline.",
+        "Set the direction and get out of the way. Micromanaging them is pointless.",
+        "Provide the target and trust them to reach it."
+      ]));
+      stressors.push(randomPick([
+        "Bureaucracy, waiting for approval, and 'let's set up a committee to discuss this'",
+        "Red tape and lengthy approval chains",
+        "Being told to 'wait' when the solution is obvious"
+      ]));
+      leadership.push(randomPick([
+        "Makes things happen. Doesn't wait for permission. Just ensure they occasionally check in.",
+        "Gets stuff done. Drives progress naturally.",
+        "Action-driver who moves fast. Inspiring pace-setter."
+      ]));
+    } else if (profile.action === 'reactive') {
+      behaviours.push(randomPick([
+        "Waits, watches, analyses. Won't rush in where angels fear to tread.",
+        "Thoughtful processor who considers before committing. They're not slow - they're thorough.",
+        "Patient evaluator who won't be rushed into action."
+      ]));
+      communications.push(randomPick([
+        "Give them time to think. 'Take a look and let me know' works better than 'quick, what do you think?'",
+        "Don't press for instant decisions. They process thoroughly.",
+        "Allow space for consideration."
+      ]));
+      stressors.push(randomPick([
+        "Being pressured for immediate responses and 'we need to decide NOW' situations",
+        "Forced urgency and artificial deadlines",
+        "Environments where 'move fast and break things' is the only mode"
+      ]));
+      leadership.push(randomPick([
+        "Thoughtful and considered. Won't make rash decisions.",
+        "Deliberate decision-maker. Thinks before acting.",
+        "Measured leader who considers implications."
+      ]));
+    }
+
+    // Decision Making
+    if (profile.decisionMaking === 'options') {
+      behaviours.push("Loves having choices. Give them three ways to do something and they'll invent a fourth.");
+      communications.push("Present alternatives. 'We could do A, B, or C - what do you think?' lights them up.");
+      stressors.push("Being told 'this is the only way' and rigid procedures");
+      leadership.push("Innovative and flexible. Encourages creative solutions.");
+    } else if (profile.decisionMaking === 'procedures') {
+      behaviours.push("Wants the manual. All of it. Preferably with an index and troubleshooting section.");
+      communications.push("Give clear steps. Numbered lists are their love language.");
+      stressors.push("Ambiguity and being told to 'just wing it'");
+      leadership.push("Creates systems and processes that actually work. Provides clarity.");
+    }
+
+    // Rules
+    if (profile.rules === 'my-rules-me-your-rules-you') {
+      behaviours.push("Live and let live philosophy. 'You do you, I'll do me.' Respects that people have different standards.");
+      communications.push("Respect their approach whilst sharing yours. They'll give you space to be different too.");
+      stressors.push("People trying to impose their way of doing things");
+      leadership.push("Flexible and tolerant of different working styles. Creates space for individuality.");
+    } else if (profile.rules === 'my-my') {
+      behaviours.push("Has strong standards and expects others to meet them. 'This is how things should be done' applies to everyone.");
+      communications.push("Understand their standards before proposing alternatives. They genuinely believe their way is best.");
+      stressors.push("People not meeting their standards and 'lowering the bar'");
+      leadership.push("Sets high standards and holds team accountable. Creates consistency and quality.");
+    } else if (profile.rules === 'no-rules-me-my-rules-you') {
+      behaviours.push("Exempts themselves from rules they expect others to follow. 'Do as I say, not as I do' could be their motto.");
+      communications.push("Tread carefully. Point out inconsistencies diplomatically if you must.");
+      stressors.push("Being held to the same standards they impose on others");
+      leadership.push("Can create resentment in teams. May struggle with credibility.");
+    } else if (profile.rules === 'my-i-dont-know') {
+      behaviours.push("Clear about their own standards but genuinely uncertain about what others should do.");
+      communications.push("They'll respect your standards - they're just figuring out their expectations of others.");
+      stressors.push("Being expected to judge others by firm standards when they're still working it out");
+      leadership.push("Non-judgemental and open. May need support in setting team expectations.");
+    }
+
+    // Response Style
+    if (profile.response === 'emotional') {
+      behaviours.push("Wears heart on sleeve. You'll know exactly how they feel about your proposal.");
+      communications.push("Acknowledge feelings first. 'I know this is frustrating' before jumping to solutions.");
+      stressors.push("Being told to 'leave emotions out of it' and cold, purely data-driven discussions");
+      leadership.push("Emotionally intelligent and empathetic. Connects with team on human level.");
+    } else if (profile.response === 'logical') {
+      behaviours.push("Leads with thinking. Data and facts are their comfort zone.");
+      communications.push("Start with the logic. 'Here's the data' before 'here's how I feel about it'.");
+      stressors.push("Decisions based purely on feelings and 'because it feels right' reasoning");
+      leadership.push("Makes objective, rational decisions. Excellent in analytical roles.");
+    } else if (profile.response === 'choice') {
+      behaviours.push("Flexes between head and heart depending on context. The chameleon of response styles.");
+      communications.push("Mirror their approach in the moment. They'll adapt, and appreciate you doing the same.");
+      stressors.push("People who are rigidly stuck in one mode");
+      leadership.push("Balanced and adaptable. Can read the room and adjust approach.");
+    }
+
+    return { behaviours, communications, stressors, leadership };
+  };
+
+  const handleReset = () => {
+    setProfile({
+      name: '',
+      direction: '',
+      reference: '',
+      scope: '',
+      sorting: '',
+      timeOrientation: '',
+      primaryRep: '',
+      motivation: '',
+      action: '',
+      decisionMaking: '',
+      rules: '',
+      response: ''
+    });
+    setShowResults(false);
+    setCurrentQuestionIndex(0);
+    setMode('choice');
+  };
+
+  const results = showResults ? generateProfile() : null;
+  const currentQuestion = randomizedQuestions[currentQuestionIndex];
+  const progress = randomizedQuestions.length > 0 ? ((currentQuestionIndex + 1) / randomizedQuestions.length) * 100 : 0;
+
+  // Mode selection screen
+  if (mode === 'choice') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8 flex items-center justify-center">
+        <div className="max-w-4xl w-full">
+          {/* Header */}
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-8 text-center">
+            <div className="mb-6">
+              <div className="text-4xl font-bold mb-2" style={{ color: '#8B2635' }}>CHANGE</div>
+              <div className="text-3xl font-bold text-slate-700">WORKING</div>
+            </div>
+            <h1 className="text-3xl font-bold text-slate-800 mb-2">NLP Metaprogramme Profiler</h1>
+            <p className="text-slate-600">Predict behaviours and unlock communication strategies</p>
+          </div>
+
+          {/* Mode selection */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <button
+              onClick={() => setMode('questionnaire')}
+              className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <HelpCircle className="w-12 h-12" style={{ color: '#8B2635' }} />
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-800 group-hover:text-burgundy">Questionnaire Mode</h2>
+                  <p className="text-sm text-slate-600">Recommended for most users</p>
+                </div>
+              </div>
+              <p className="text-slate-700 mb-4">
+                Answer situational questions and we'll identify your metaprogramme patterns for you.
+              </p>
+              <ul className="text-sm text-slate-600 space-y-2">
+                <li>✓ No NLP knowledge required</li>
+                <li>✓ 20-25 quick questions</li>
+                <li>✓ Takes about 5 minutes</li>
+              </ul>
+            </button>
+
+            <button
+              onClick={() => setMode('expert')}
+              className="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition-shadow text-left group"
+            >
+              <div className="flex items-center gap-4 mb-4">
+                <BookOpen className="w-12 h-12" style={{ color: '#8B2635' }} />
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-800 group-hover:text-burgundy">Expert Mode</h2>
+                  <p className="text-sm text-slate-600">For NLP practitioners</p>
+                </div>
+              </div>
+              <p className="text-slate-700 mb-4">
+                Directly select metaprogramme patterns if you already know them.
+              </p>
+              <ul className="text-sm text-slate-600 space-y-2">
+                <li>✓ For trained NLP practitioners</li>
+                <li>✓ Fast profile creation</li>
+                <li>✓ Direct pattern selection</li>
+              </ul>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Questionnaire mode
+  if (mode === 'questionnaire' && !showResults && currentQuestion) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
+        <div className="max-w-3xl mx-auto">
+          {/* Header with Home button */}
+          <div className="flex justify-between items-center mb-6">
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to return to the start? Your progress will be lost.')) {
+                  handleReset();
+                }
+              }}
+              className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+            >
+              ← Exit to Home
+            </button>
+            {currentQuestionIndex > 0 && (
+              <button
+                onClick={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}
+                className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+              >
+                ← Back
+              </button>
+            )}
+          </div>
+
+          {/* Progress bar */}
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-slate-700">
+                Question {currentQuestionIndex + 1} of {randomizedQuestions.length}
+              </span>
+              <span className="text-sm text-slate-600">{Math.round(progress)}% complete</span>
+            </div>
+            <div className="w-full bg-slate-200 rounded-full h-3">
+              <div 
+                className="h-3 rounded-full transition-all duration-300" 
+                style={{ width: `${progress}%`, backgroundColor: '#8B2635' }}
+              />
+            </div>
+          </div>
+
+          {/* Question card */}
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-slate-800 mb-6">{currentQuestion.question}</h2>
+            
+            <div className="space-y-4">
+              {currentQuestion.options.map((option, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleQuestionAnswer(currentQuestion.metaprogramme, option.value)}
+                  className="w-full p-6 text-left border-2 border-slate-200 rounded-lg hover:border-burgundy hover:bg-slate-50 transition-all"
+                  style={{ '--burgundy': '#8B2635' }}
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-8 h-8 rounded-full border-2 flex items-center justify-center" 
+                         style={{ borderColor: '#8B2635', color: '#8B2635' }}>
+                      {String.fromCharCode(65 + idx)}
+                    </div>
+                    <div className="flex-1 text-slate-700 font-medium">
+                      {option.text}
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* Name input on first question */}
+            {currentQuestionIndex === 0 && (
+              <div className="mt-8 pt-6 border-t">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Your Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={profile.name}
+                  onChange={(e) => setProfile({...profile, name: e.target.value})}
+                  placeholder="e.g., Sarah"
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Expert mode (original interface)
+  if (mode === 'expert' && !showResults) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Branded Header */}
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold" style={{ color: '#8B2635' }}>CHANGE</div>
+                  <div className="text-2xl md:text-3xl font-bold text-slate-700">WORKING</div>
+                </div>
+                <div className="h-16 w-px bg-slate-300 hidden md:block"></div>
+                <div className="text-center md:text-left">
+                  <h1 className="text-xl md:text-2xl font-bold text-slate-800">NLP Metaprogramme Profiler</h1>
+                  <p className="text-sm text-slate-600">Expert Mode - Direct Pattern Selection</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setMode('choice')}
+                className="px-4 py-2 text-sm bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300"
+              >
+                ← Back to Mode Selection
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 mb-8">
+            {/* Rest of expert mode interface - same as before */}
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Person's Name (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={profile.name}
+                  onChange={(e) => setProfile({...profile, name: e.target.value})}
+                  placeholder="e.g., Sarah, Team Member A, etc."
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg"
+                />
+              </div>
+
+              {Object.entries(metaprogrammes).map(([key, config]) => (
+                <div key={key} className="bg-slate-50 p-4 rounded-lg">
+                  <label className="block text-sm font-semibold text-slate-700 mb-3">
+                    {config.label}
+                  </label>
+                  <div className="space-y-2">
+                    {config.options.map(option => (
+                      <label key={option.value} className="flex items-start gap-3 cursor-pointer p-3 rounded-lg hover:bg-white transition-colors">
+                        <input
+                          type="radio"
+                          name={key}
+                          value={option.value}
+                          checked={profile[key] === option.value}
+                          onChange={(e) => setProfile({...profile, [key]: e.target.value})}
+                          className="mt-1 w-5 h-5"
+                          style={{ accentColor: '#8B2635' }}
+                        />
+                        <div className="flex-1">
+                          <div className="font-medium text-slate-800">{option.label}</div>
+                          <div className="text-sm text-slate-600">{option.desc}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              <button
+                onClick={() => {
+                  const requiredFields = Object.entries(profile)
+                    .filter(([key]) => key !== 'name')
+                    .map(([, value]) => value);
+                  if (requiredFields.every(v => v !== '')) {
+                    setShowResults(true);
+                  } else {
+                    alert('Please complete all metaprogramme selections!');
+                  }
+                }}
+                style={{ backgroundColor: '#8B2635' }}
+                className="w-full text-white py-4 px-6 rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+              >
+                <User className="w-6 h-6" />
+                Generate Behavioural Profile
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Results screen (same for both modes)
+  if (showResults && results) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Results display - same as before */}
+          <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 mb-8">
+            <div className="flex items-center justify-between border-b pb-4 mb-6">
+              <h2 className="text-2xl font-bold text-slate-800">
+                {profile.name ? `Profile: ${profile.name}` : 'Behavioural Profile'}
+              </h2>
+              <button
+                onClick={handleReset}
+                className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+              >
+                New Profile
+              </button>
+            </div>
+
+            {/* Display results sections */}
+            <div className="space-y-6">
+              {/* Pattern Summary - Narrative Style */}
+              <div className="border-l-4 p-6 rounded-r-lg" style={{ backgroundColor: '#f9f5f0', borderColor: '#8B2635' }}>
+                <h3 className="font-semibold mb-3 text-lg" style={{ color: '#8B2635' }}>Their Profile Story</h3>
+                <p className="text-slate-700 leading-relaxed italic">
+                  {generateNarrativeSummary()}
+                </p>
+              </div>
+
+              {/* Behavioural Predictions */}
+              <div className="bg-green-50 border-l-4 border-green-600 p-6 rounded-r-lg">
+                <div className="flex items-center gap-2 mb-4">
+                  <User className="w-6 h-6 text-green-600" />
+                  <h3 className="text-xl font-bold text-green-900">Behavioural Predictions</h3>
+                </div>
+                <ul className="space-y-3">
+                  {results.behaviours.map((behaviour, idx) => (
+                    <li key={idx} className="text-slate-700 pl-4 border-l-2 border-green-300">
+                      {behaviour}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Communication Strategies */}
+              <div className="bg-blue-50 border-l-4 border-blue-600 p-6 rounded-r-lg">
+                <div className="flex items-center gap-2 mb-4">
+                  <MessageSquare className="w-6 h-6 text-blue-600" />
+                  <h3 className="text-xl font-bold text-blue-900">Communication Strategies</h3>
+                </div>
+                <ul className="space-y-3">
+                  {results.communications.map((comm, idx) => (
+                    <li key={idx} className="text-slate-700 pl-4 border-l-2 border-blue-300">
+                      {comm}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Stress Triggers */}
+              <div className="bg-amber-50 border-l-4 border-amber-600 p-6 rounded-r-lg">
+                <div className="flex items-center gap-2 mb-4">
+                  <AlertTriangle className="w-6 h-6 text-amber-600" />
+                  <h3 className="text-xl font-bold text-amber-900">Potential Stress Triggers</h3>
+                </div>
+                <ul className="space-y-3">
+                  {results.stressors.map((stress, idx) => (
+                    <li key={idx} className="text-slate-700 pl-4 border-l-2 border-amber-300">
+                      {stress}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Leadership Insights */}
+              <div className="bg-purple-50 border-l-4 border-purple-600 p-6 rounded-r-lg">
+                <div className="flex items-center gap-2 mb-4">
+                  <TrendingUp className="w-6 h-6 text-purple-600" />
+                  <h3 className="text-xl font-bold text-purple-900">Leadership Style Insights</h3>
+                </div>
+                <ul className="space-y-3">
+                  {results.leadership.map((lead, idx) => (
+                    <li key={idx} className="text-slate-700 pl-4 border-l-2 border-purple-300">
+                      {lead}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Pro Tip */}
+              <div className="bg-slate-100 p-4 rounded-lg text-sm text-slate-600 italic">
+                <p>💡 <strong>Pro tip:</strong> Remember these are patterns, not prison sentences. People are wonderfully complex and context matters. Use this as a starting point for understanding, not a definitive judgement. And yes, they might surprise you - that's the fun part.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="bg-white rounded-lg shadow-lg p-6 md:p-8 text-center">
+            <h3 className="text-xl font-bold text-slate-800 mb-2">
+              Want to learn more about metaprogrammes and leadership development?
+            </h3>
+            <p className="text-slate-600 mb-4">
+              Discover how understanding communication patterns can transform your leadership and team dynamics
+            </p>
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-sm">
+              <a href="https://www.changeworking.co.uk" target="_blank" className="hover:underline font-medium" style={{ color: '#8B2635' }}>
+                www.changeworking.co.uk
+              </a>
+              <span className="hidden md:inline text-slate-400">|</span>
+              <a href="mailto:alan@changeworking.co.uk" className="hover:underline font-medium" style={{ color: '#8B2635' }}>
+                alan@changeworking.co.uk
+              </a>
+              <span className="hidden md:inline text-slate-400">|</span>
+              <a href="tel:07971916534" className="hover:underline font-medium" style={{ color: '#8B2635' }}>
+                07971 916534
+              </a>
+              <span className="hidden md:inline text-slate-400">|</span>
+              <a href="https://www.linkedin.com/in/alanjohnsonnlp" target="_blank" className="hover:underline font-medium" style={{ color: '#8B2635' }}>
+                LinkedIn
+              </a>
+            </div>
+            <p className="mt-4 text-xs text-slate-500">Created by Change Working | Use responsibly 🧠</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+};
+
+
+        // SVG Icons
+        const User = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+        );
+
+        const Brain = ({ className, style }) => (
+            <svg className={className} style={style} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/>
+                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>
+            </svg>
+        );
+
+        const MessageSquare = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+        );
+
+        const AlertTriangle = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+                <path d="M12 9v4"/><path d="M12 17h.01"/>
+            </svg>
+        );
+
+        const TrendingUp = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                <polyline points="17 6 23 6 23 12"/>
+            </svg>
+        );
+
+        const HelpCircle = ({ className, style }) => (
+            <svg className={className} style={style} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                <path d="M12 17h.01"/>
+            </svg>
+        );
+
+        const BookOpen = ({ className, style }) => (
+            <svg className={className} style={style} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+        );
+
+        // Wait for React to be ready, then render
+        if (typeof React !== 'undefined' && typeof ReactDOM !== 'undefined') {
+            const root = ReactDOM.createRoot(document.getElementById('root'));
+            root.render(React.createElement(MetaprogrammeProfiler));
+        } else {
+            console.error('React or ReactDOM not loaded');
+        }
+    </script>
+</body>
+</html>
