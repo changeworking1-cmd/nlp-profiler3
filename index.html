@@ -7,7 +7,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:system-ui,sans-serif;background:linear-gradient(135deg,#f8fafc,#f1f5f9);min-height:100vh}
-.container{max-width:48rem;margin:0 auto;padding:2rem}
+.container{max-width:56rem;margin:0 auto;padding:2rem}
 .card{background:#fff;border-radius:0.5rem;box-shadow:0 10px 15px -3px rgba(0,0,0,0.1);padding:2rem}
 .btn{padding:0.75rem 1.5rem;border:none;border-radius:0.5rem;font-size:1rem;cursor:pointer;font-weight:600;transition:opacity 0.2s}
 .btn:hover{opacity:0.9}
@@ -36,13 +36,17 @@ input[type="radio"]{min-width:20px;min-height:20px;margin-right:0.5rem;accent-co
 .gap-3{gap:0.75rem}
 .progress-bar{width:100%;height:0.75rem;background:#e2e8f0;border-radius:9999px;overflow:hidden;margin-bottom:1rem}
 .progress-fill{height:100%;background:#8B2635;transition:width 0.3s}
-.question-option{display:flex;align-items:center;padding:1rem;border:2px solid #e2e8f0;border-radius:0.5rem;margin-bottom:0.75rem;cursor:pointer;transition:all 0.2s}
+.question-option{display:flex;align-items:flex-start;padding:1rem;border:2px solid #e2e8f0;border-radius:0.5rem;margin-bottom:0.75rem;cursor:pointer;transition:all 0.2s}
 .question-option:hover{border-color:#8B2635;background:#f8fafc}
 .question-option.selected{border-color:#8B2635;background:#fff5f7}
+.question-option label{cursor:pointer;flex:1}
 .result-section{padding:1.5rem;border-left:4px solid;border-radius:0 0.5rem 0.5rem 0;margin-bottom:1.5rem}
-.result-section h3{margin-bottom:1rem;font-size:1.25rem}
-.result-section p{line-height:1.6;color:#334155}
+.result-section h3{margin-bottom:1rem;font-size:1.25rem;font-weight:700}
+.result-section p{line-height:1.7;color:#334155;margin-bottom:0.75rem}
+.result-section ul{margin-left:1.25rem}
+.result-section li{margin-bottom:0.5rem;line-height:1.6}
 @media print{button{display:none!important}}
+@media(max-width:768px){.container{padding:1rem}.card{padding:1.5rem}}
 </style>
 </head>
 <body>
@@ -56,21 +60,45 @@ input[type="radio"]{min-width:20px;min-height:20px;margin-right:0.5rem;accent-co
 const {useState,useEffect}=React;
 
 const questions=[
-{id:'direction',q:"What motivates you more at work?",a:"Achieving goals and gaining rewards",b:"Avoiding problems and risks"},
-{id:'reference',q:"When you've done a good job, you know because:",a:"You feel satisfied internally",b:"Others give you positive feedback"},
-{id:'scope',q:"When starting a new project, you prefer to:",a:"See the big picture and overall vision",b:"Focus on specific details and steps"},
-{id:'sorting',q:"In conversations, you tend to:",a:"Find similarities and common ground",b:"Spot differences and exceptions"},
-{id:'time',q:"How do you experience time?",a:"Fluid and in-the-moment",b:"Linear and planned ahead"},
-{id:'rep',q:"When learning something new, you prefer to:",a:"See diagrams and visual explanations",b:"Hear explanations and discuss it",c:"Get hands-on and try it yourself"},
-{id:'motivation',q:"What drives you most?",a:"Having influence and control",b:"Building relationships and belonging",c:"Achieving results and goals"},
-{id:'action',q:"When faced with a challenge, you:",a:"Jump in and take action immediately",b:"Think it through before acting"},
-{id:'decision',q:"When solving problems, you prefer:",a:"Multiple options and alternatives",b:"Proven procedures and best practices"},
-{id:'response',q:"Under stress, you tend to:",a:"Lead with emotions and feelings",b:"Stay logical and analytical",c:"Flex between both depending on context"},
-{id:'rules1',q:"When it comes to standards:",a:"I follow my way, you follow yours",b:"There's one right way for everyone"},
-{id:'rules2',q:"About workplace procedures:",a:"Different approaches work for different people",b:"We should all follow the same standards"},
-{id:'communication',q:"You prefer communication that is:",a:"Direct and to the point",b:"Detailed with full context"},
-{id:'change',q:"When things change, you:",a:"Get excited by new possibilities",b:"Prefer stability and consistency"},
-{id:'focus',q:"You work best when:",a:"Working on one thing deeply",b:"Juggling multiple projects"}
+{id:'dir1',meta:'direction',q:"What motivates you more in your work?",a:"Achieving goals and gaining rewards",b:"Avoiding problems and preventing mistakes"},
+{id:'dir2',meta:'direction',q:"When setting objectives, you focus on:",a:"What you want to achieve and gain",b:"What you want to avoid or prevent"},
+{id:'dir3',meta:'direction',q:"In conversations about change, you emphasise:",a:"The benefits and opportunities",b:"The risks and what could go wrong"},
+
+{id:'ref1',meta:'reference',q:"When you've done a good job, you know because:",a:"You feel satisfied with it internally",b:"Others give you positive feedback"},
+{id:'ref2',meta:'reference',q:"When making an important decision, do you:",a:"Trust your own judgement primarily",b:"Seek input and validation from others"},
+{id:'ref3',meta:'reference',q:"How important is external recognition to you?",a:"Nice to have, but I know my own worth",b:"Very important - it confirms I'm on track"},
+
+{id:'scope1',meta:'scope',q:"When starting a new project, you prefer to:",a:"See the big picture and overall vision first",b:"Focus on specific details and steps"},
+{id:'scope2',meta:'scope',q:"You work best with information that is:",a:"High-level overviews and concepts",b:"Detailed sequences and specifics"},
+{id:'scope3',meta:'scope',q:"When explaining something, you tend to:",a:"Start with the context and vision",b:"Start with the steps and details"},
+
+{id:'sort1',meta:'sorting',q:"When someone shares an idea with you, you naturally:",a:"Think about how it connects to what you know",b:"Notice what makes it unique or different"},
+{id:'sort2',meta:'sorting',q:"In discussions, you find yourself:",a:"Building on what's been said with 'yes, and...'",b:"Pointing out alternatives with 'but what about...'"},
+{id:'sort3',meta:'sorting',q:"When reviewing a plan, you tend to:",a:"Focus on what works and how it fits",b:"Spot gaps, inconsistencies, and areas to improve"},
+
+{id:'time1',meta:'time',q:"How do you experience time?",a:"Fluid and in-the-moment",b:"Linear and planned ahead"},
+{id:'time2',meta:'time',q:"Looking at your calendar:",a:"It's more guidelines than rules",b:"It's a sacred contract"},
+{id:'time3',meta:'time',q:"When deadlines approach:",a:"You work best under pressure",b:"You've already finished"},
+
+{id:'rep1',meta:'rep',q:"When learning something new, you prefer to:",a:"See diagrams and visual explanations",b:"Hear explanations and discuss it",c:"Get hands-on and try it yourself"},
+{id:'rep2',meta:'rep',q:"You remember things best when you:",a:"See them written or illustrated",b:"Hear them explained or discussed",c:"Do them or physically experience them"},
+{id:'rep3',meta:'rep',q:"In meetings, you prefer:",a:"Slides and visual presentations",b:"Discussion and verbal exchanges",c:"Interactive activities and demos"},
+
+{id:'mot1',meta:'motivation',q:"What drives you most at work?",a:"Having influence and control",b:"Building relationships and belonging",c:"Achieving results and hitting targets"},
+{id:'mot2',meta:'motivation',q:"Your ideal work environment involves:",a:"Having authority and being consulted",b:"Collaboration and strong connections",c:"Clear targets and measurable success"},
+{id:'mot3',meta:'motivation',q:"What makes you feel most satisfied?",a:"Being able to make decisions and shape direction",b:"Positive relationships and team cohesion",c:"Completing challenging tasks and reaching milestones"},
+
+{id:'act1',meta:'action',q:"When faced with a challenge, you:",a:"Jump in and take action immediately",b:"Think it through carefully before acting"},
+{id:'act2',meta:'action',q:"Your approach to problems is:",a:"Ready, fire, aim - you learn by doing",b:"Ready, aim, aim again - you plan carefully"},
+{id:'act3',meta:'action',q:"When opportunities arise:",a:"You seize them quickly",b:"You evaluate them thoroughly first"},
+
+{id:'dec1',meta:'decision',q:"When solving problems, you prefer:",a:"Multiple options and alternatives",b:"Proven procedures and best practices"},
+{id:'dec2',meta:'decision',q:"You feel most comfortable when:",a:"You have choices and flexibility",b:"There's a clear process to follow"},
+{id:'dec3',meta:'decision',q:"When facing a decision:",a:"You want to explore all possibilities",b:"You want to know the right way to do it"},
+
+{id:'res1',meta:'response',q:"Under stress, you tend to:",a:"Lead with emotions and feelings",b:"Stay logical and analytical",c:"Flex between both depending on context"},
+{id:'res2',meta:'response',q:"When making decisions:",a:"Your gut feeling matters most",b:"The data and logic matter most",c:"You use both equally"},
+{id:'res3',meta:'response',q:"People would describe you as:",a:"Emotionally expressive and warm",b:"Rational and level-headed",c:"Balanced between head and heart"}
 ];
 
 const App=()=>{
@@ -86,10 +114,12 @@ useEffect(()=>{
 if(sessionStorage.getItem('auth')==='1')setAuth(true);
 const saved=localStorage.getItem('profiler-progress');
 if(saved){
+try{
 const data=JSON.parse(saved);
 setAnswers(data.answers||{});
 setCurrentQ(data.currentQ||0);
 setName(data.name||'');
+}catch(e){}
 }
 },[]);
 
@@ -114,12 +144,12 @@ setPwd('');
 const handleAnswer=(questionId,answer)=>{
 setAnswers({...answers,[questionId]:answer});
 if(currentQ<questions.length-1){
-setTimeout(()=>setCurrentQ(currentQ+1),300);
+setTimeout(()=>setCurrentQ(currentQ+1),200);
 }else{
 setTimeout(()=>{
 setShowResults(true);
 localStorage.removeItem('profiler-progress');
-},300);
+},200);
 }
 };
 
@@ -128,30 +158,109 @@ if(currentQ>0)setCurrentQ(currentQ-1);
 };
 
 const handleReset=()=>{
+if(window.confirm('Start a new profile? Your current progress will be lost.')){
 setAnswers({});
 setCurrentQ(0);
 setShowResults(false);
 setName('');
 localStorage.removeItem('profiler-progress');
+}
 };
 
-const generateProfile=()=>{
-const profile={
-direction:answers.direction==='a'?'Towards':'Away From',
-reference:answers.reference==='a'?'Internal':'External',
-scope:answers.scope==='a'?'Big Picture':'Detail',
-sorting:answers.sorting==='a'?'Matcher':'Mismatcher',
-time:answers.time==='a'?'In-Time':'Through-Time',
-rep:answers.rep==='a'?'Visual':answers.rep==='b'?'Auditory':'Kinaesthetic',
-motivation:answers.motivation==='a'?'Power':answers.motivation==='b'?'Affiliation':'Achievement',
-action:answers.action==='a'?'Proactive':'Reactive',
-decision:answers.decision==='a'?'Options':'Procedures',
-response:answers.response==='a'?'Emotional':answers.response==='b'?'Logical':'Choice'
+const getProfile=()=>{
+const counts={};
+questions.forEach(q=>{
+if(answers[q.id]){
+const key=`${q.meta}_${answers[q.id]}`;
+counts[key]=(counts[key]||0)+1;
+}
+});
+
+const profile={};
+['direction','reference','scope','sorting','time','rep','motivation','action','decision','response'].forEach(meta=>{
+const opts=meta==='rep'?['a','b','c']:['a','b'];
+let max=0,chosen='a';
+opts.forEach(opt=>{
+const count=counts[`${meta}_${opt}`]||0;
+if(count>max){max=count;chosen=opt;}
+});
+profile[meta]=chosen;
+});
+
+return profile;
 };
 
-const narrative=`${name||'This person'} is ${profile.direction==='Towards'?'naturally drawn to goals and gains':'focused on avoiding problems and risks'}, with ${profile.reference==='Internal'?'strong internal confidence':'a need for external validation'}. They ${profile.scope==='Big Picture'?'see patterns and connections across the landscape':'track details and sequences meticulously'}. In conversations, they ${profile.sorting==='Matcher'?'build bridges and find common ground':'spot differences and question assumptions'}. Time feels ${profile.time==='In-Time'?'fluid and present-focused':'structured and planned'} to them. They're ${profile.rep.toLowerCase()}-oriented, ${profile.action.toLowerCase()}, and driven by ${profile.motivation.toLowerCase()}. When making decisions, they prefer ${profile.decision.toLowerCase()}, and under stress they tend to be ${profile.response.toLowerCase()}.`;
+const generateResults=()=>{
+const p=getProfile();
+const person=name||'This person';
 
-return{profile,narrative};
+const dir=p.direction==='a';
+const ref=p.reference==='a';
+const scope=p.scope==='a';
+const match=p.sorting==='a';
+const inTime=p.time==='a';
+const rep=p.rep==='a'?'visual':p.rep==='b'?'auditory':'kinaesthetic';
+const motiv=p.motivation==='a'?'power':p.motivation==='b'?'affiliation':'achievement';
+const proact=p.action==='a';
+const opts=p.decision==='a';
+const emot=p.response==='a';
+const logic=p.response==='b';
+
+const narrative=`${person} is ${dir?'naturally drawn to goals and gains, energised by what they want to achieve':'focused on avoiding problems and risks, alert to what could go wrong'}. They ${ref?'trust their own judgement and know when they\'ve done well':'value external feedback and confirmation from others'}. When processing information, they ${scope?'see patterns and connections across the landscape, grasping the big picture quickly':'track details and sequences meticulously, ensuring nothing gets missed'}. In conversations, they ${match?'build bridges between ideas, finding common ground and similarity':'spot what\'s different and question assumptions, finding exceptions'}. Time feels ${inTime?'fluid and present-focused - they live in the moment':'structured and planned - they see time laid out ahead'}. They're ${rep}-oriented in how they process the world, ${proact?'jumping into action immediately':'thinking things through carefully before acting'}, and driven by ${motiv==='power'?'influence and control':motiv==='affiliation'?'connection and belonging':'achievement and results'}. When solving problems, they prefer ${opts?'multiple options and alternatives':'proven procedures and best practices'}. Under pressure, they ${emot?'lead with emotions and feelings':logic?'stay logical and analytical':'flex between head and heart depending on context'}.`;
+
+const behaviours=[
+dir?'Motivated by goals, rewards, and what they\'ll gain. In meetings, they talk about benefits and opportunities.':'Motivated by avoiding problems and risks. They spot what could go wrong before others see it.',
+ref?'They know when they\'ve done well - don\'t need constant validation. Can seem stubborn because they trust their own judgement.':'External validation matters. They check in regularly and appreciate feedback. Recognition fuels their confidence.',
+scope?'Big picture thinker who sees connections others miss. May gloss over details that matter.':'Detail-oriented and thorough. Can get lost in specifics and miss the forest for the trees.',
+match?'Consensus-builder who finds common ground. Smooths over conflicts naturally. May avoid necessary disagreements.':'Critical thinker who spots what doesn\'t fit. Quality controller who catches errors. Can seem negative when they\'re being thorough.',
+inTime?'Lives spontaneously. Brilliant in crises. Meetings that overrun don\'t stress them.':'Has a mental Gantt chart for everything. Can tell you what they\'re doing three weeks from now.',
+rep==='visual'?'Picture-thinker. Uses "I see what you mean" and "looks good". Needs to see it to get it.':rep==='auditory'?'Verbal processor who thinks by talking. Says "that sounds good" and "rings a bell".':'Hands-on learner. Uses "I feel like" and "get a handle on". Needs to do it to understand it.',
+motiv==='power'?'Wants to be in charge or at least consulted. Their email signature probably includes all their qualifications.':motiv==='affiliation'?'Team player who builds relationships. They know everyone\'s birthday and organise the social events.':'Results-driven achiever. Has a to-do list for their to-do list. Feels restless without targets.',
+proact?'Takes initiative without being asked. Acts first, apologises later. Can seem impulsive.':'Thinks before acting. Plans carefully. Can seem slow to others but saves disasters.',
+opts?'Loves having choices and alternative routes. Saying "you must do it this way" makes them twitch.':'Feels comfortable with proven processes. "This is how we do it" is reassuring, not restrictive.',
+emot?'Leads with feelings. You know how they feel about something. Brings warmth and connection.':logic?'Stays analytical under pressure. The calm one in a crisis. Can seem cold when they\'re just focused.':'Balanced between head and heart. Adapts their approach to what the situation needs.'
+];
+
+const communications=[
+dir?'Frame things in terms of gains and achievements. "Here\'s what you\'ll accomplish" opens doors.':'Address potential problems first. "Here\'s how we avoid X" resonates more than "here\'s what we\'ll gain".',
+ref?'Trust their judgement. Micromanaging kills their motivation. Give autonomy and outcomes, not processes.':'Give regular feedback and recognition. They need to know they\'re on track. Silence feels like failure.',
+scope?'Start with the vision before diving into details. Give them the context first.':'Provide step-by-step information. Skipping details frustrates them. Be thorough.',
+match?'Acknowledge agreement first. Build on common ground. They respond well to collaboration.':'Welcome their critical input. "What am I missing?" invites their natural talent. Don\'t dismiss their concerns.',
+inTime?'Keep it present-focused. "Right now, what we need..." works better than long-term planning.':'Give timelines and milestones. "Here\'s the roadmap" is music to their ears.',
+rep==='visual'?'Show them. Diagrams, charts, mind maps. One visual beats a thousand words.':rep==='auditory'?'Talk it through. Voice notes beat emails. Let them verbally process.':'Let them experience it. Hands-on demos beat PowerPoints. Get them doing, not just viewing.',
+motiv==='power'?'Acknowledge their authority and expertise. "Given your experience..." opens doors.':motiv==='affiliation'?'Build the relationship first. They work better with people they like.':'Set clear targets and metrics. Show them the finish line and let them run.',
+proact?'Give them autonomy. Prescriptive instructions frustrate them. Set the outcome, not the method.':'Give them time to think. Rushing them creates resistance and reduces quality.',
+opts?'Offer choices. Even if there\'s a preferred route, present alternatives.':'Provide clear processes. They want to know "the right way" to do something.',
+emot?'Acknowledge feelings alongside facts. They need emotional connection, not just data.':logic?'Lead with facts and logic. Emotional appeals won\'t land - stick to the rational case.':'Read the situation. Sometimes they need data, sometimes empathy. They\'ll signal which.'
+];
+
+const stressors=[
+dir?'Being told "don\'t do that" without being told what to do instead.':'Forced positivity and "don\'t worry about it" when they\'ve identified real risks.',
+ref?'Micromanagement and being second-guessed constantly.':'Lack of feedback and being left wondering if they\'re meeting expectations.',
+scope?'Getting bogged down in minutiae when the vision is unclear.':'Being asked to "just wing it" without proper detail or planning.',
+match?'Being labelled "soft" for building consensus and seeking harmony.':'Being called "negative" or "difficult" when identifying legitimate issues.',
+inTime?'Rigid schedules and long-term planning sessions that go on forever.':'Last-minute chaos and "we\'ll figure it out as we go" approaches.',
+rep==='visual'?'Long phone calls without visual aids. Being asked to "just imagine it".':rep==='auditory'?'Noisy environments and being expected to "just read the memo".':'Sitting still through endless theoretical discussions without any doing.',
+motiv==='power'?'Being micromanaged or having decisions overruled publicly.':motiv==='affiliation'?'Conflict-heavy environments where relationships are hostile.':'Vague goals and not knowing if they\'re hitting the mark.',
+proact?'Being prevented from taking action or having to wait for endless approvals.':'Being rushed or pressured to act before they\'ve thought it through.',
+opts?'Being told "this is the only way" when they can see alternatives.':'Too many options without clear guidance on which is best.',
+emot?'Being told to "leave emotions out of it" or "just be logical".':logic?'Being expected to make decisions based on feelings rather than facts.':'Being forced into one mode when the situation calls for the other.'
+];
+
+const leadership=[
+dir?'Inspires teams toward ambitious goals. Creates compelling visions. May need reminding about risk management.':'Excellent risk manager who prevents disasters. Keeps team safe. May need coaching on celebrating wins.',
+ref?'Decisive leader who backs their judgement. Inspires confidence. May miss valuable external perspectives.':'Collaborative leader who builds consensus. Team feels heard. May overthink decisions waiting for confirmation.',
+scope?'Strategic thinker who provides direction. Sees opportunities others miss. May need support with implementation details.':'Ensures excellence through attention to detail. Nothing gets missed. May need help stepping back to see the bigger picture.',
+match?'Creates harmony and finds common ground. Builds collaborative teams. May avoid necessary conflicts.':'Quality assurance leader who elevates standards. Catches problems early. May need support recognising when good enough is sufficient.',
+inTime?'Excellent crisis manager. Thrives when things go sideways. May need support with long-term planning.':'Strategic planner extraordinaire. Has succession plans for succession plans. May struggle adapting to rapid change.',
+rep==='visual'?'Creates clear vision (literally). Loves whiteboards and presentations.':rep==='auditory'?'Excellent communicator and listener. Team members feel genuinely heard.':'Leads by doing. Team learns through action, not abstract concepts.',
+motiv==='power'?'Takes charge decisively. Won\'t shy away from tough calls. Watch for steamrolling others.':motiv==='affiliation'?'Builds cohesive teams where people want to work. May struggle with necessary difficult conversations.':'Results-focused and target-driven. Achieves outcomes. May need reminding about the human element.',
+proact?'Makes things happen. Takes initiative. May need coaching on when to pause and consult.':'Thoughtful and thorough. Prevents mistakes through careful planning. May need encouragement to act faster.',
+opts?'Innovative problem-solver who finds creative solutions. May confuse team with too many alternatives.':'Efficient operator who follows best practices. Reliable and consistent. May resist necessary innovation.',
+emot?'Warm leader who connects emotionally. Team feels cared for. May make decisions from feelings rather than facts.':logic?'Calm under pressure. Makes sound decisions based on evidence. May seem detached from team emotions.':'Adaptive leader who reads situations well. Brings both logic and empathy as needed.'
+];
+
+return{narrative,behaviours,communications,stressors,leadership};
 };
 
 const exportPDF=()=>{
@@ -166,7 +275,7 @@ return(
 <div className="text-center mb-6">
 <div className="text-3xl burgundy mb-2" style={{fontWeight:700}}>CHANGE WORKING</div>
 <h1 className="text-2xl mb-2" style={{fontWeight:600}}>NLP Metaprogramme Profiler</h1>
-<p className="gray">Please enter your access password</p>
+<p className="gray">Professional behavioural profiling tool</p>
 </div>
 <form onSubmit={handleLogin}>
 <div className="mb-4">
@@ -178,7 +287,7 @@ return(
 </form>
 <div className="mt-4 text-center text-sm gray" style={{paddingTop:'1.5rem',borderTop:'1px solid #e2e8f0'}}>
 <p className="mb-2">Don't have access?</p>
-<a href="mailto:alan@changeworking.co.uk" className="burgundy" style={{fontWeight:500}}>Contact us</a>
+<a href="mailto:alan@changeworking.co.uk" className="burgundy" style={{fontWeight:500,textDecoration:'none'}}>Contact us to get your password</a>
 </div>
 </div>
 </div>
@@ -187,12 +296,12 @@ return(
 
 // Results screen
 if(showResults){
-const {profile,narrative}=generateProfile();
+const results=generateResults();
 return(
 <div className="container">
 <div className="card">
-<div className="flex justify-between items-center mb-6" style={{borderBottom:'1px solid #e2e8f0',paddingBottom:'1rem'}}>
-<h2 className="text-2xl" style={{fontWeight:700}}>Your Profile{name?`: ${name}`:''}</h2>
+<div className="flex justify-between items-center mb-6" style={{borderBottom:'2px solid #e2e8f0',paddingBottom:'1rem'}}>
+<h2 className="text-2xl" style={{fontWeight:700}}>Profile{name?`: ${name}`:''}</h2>
 <div className="flex gap-3">
 <button onClick={exportPDF} className="btn btn-primary">📄 Save PDF</button>
 <button onClick={handleReset} className="btn btn-secondary">New Profile</button>
@@ -200,43 +309,49 @@ return(
 </div>
 
 <div className="result-section" style={{backgroundColor:'#f9f5f0',borderColor:'#8B2635'}}>
-<h3 className="burgundy">Your Story</h3>
-<p style={{fontStyle:'italic'}}>{narrative}</p>
+<h3 className="burgundy">Profile Narrative</h3>
+<p style={{fontStyle:'italic',fontSize:'1.05rem',lineHeight:'1.8'}}>{results.narrative}</p>
 </div>
 
 <div className="result-section" style={{backgroundColor:'#f0fdf4',borderColor:'#16a34a'}}>
-<h3 style={{color:'#16a34a'}}>Your Patterns</h3>
-<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'0.75rem'}}>
-{Object.entries(profile).map(([key,val])=>(
-<div key={key} style={{background:'#fff',padding:'0.75rem',borderRadius:'0.5rem'}}>
-<div className="text-sm gray">{key.charAt(0).toUpperCase()+key.slice(1)}:</div>
-<div className="burgundy" style={{fontWeight:600}}>{val}</div>
-</div>
-))}
-</div>
+<h3 style={{color:'#16a34a'}}>Behavioural Predictions</h3>
+<ul>
+{results.behaviours.map((b,i)=><li key={i}>{b}</li>)}
+</ul>
 </div>
 
 <div className="result-section" style={{backgroundColor:'#eff6ff',borderColor:'#2563eb'}}>
-<h3 style={{color:'#2563eb'}}>Communication Tips</h3>
-<p>
-{profile.reference==='Internal'?'Trust their judgment, don\'t micromanage.':'Give regular feedback and recognition.'}
-{' '}
-{profile.scope==='Big Picture'?'Start with the vision before diving into details.':'Provide step-by-step information and specifics.'}
-{' '}
-{profile.action==='Proactive'?'Give them autonomy to take initiative.':'Give them time to think before expecting action.'}
-</p>
+<h3 style={{color:'#2563eb'}}>Communication Strategies</h3>
+<ul>
+{results.communications.map((c,i)=><li key={i}>{c}</li>)}
+</ul>
 </div>
 
-<div style={{marginTop:'2rem',padding:'1.5rem',background:'#f8fafc',borderRadius:'0.5rem',textAlign:'center'}}>
-<p className="text-sm gray">Want to go deeper?</p>
-<p className="text-sm"><a href="mailto:alan@changeworking.co.uk" className="burgundy" style={{fontWeight:600}}>Book a 1-to-1 debrief session</a></p>
+<div className="result-section" style={{backgroundColor:'#fffbeb',borderColor:'#d97706'}}>
+<h3 style={{color:'#d97706'}}>Potential Stress Triggers</h3>
+<ul>
+{results.stressors.map((s,i)=><li key={i}>{s}</li>)}
+</ul>
+</div>
+
+<div className="result-section" style={{backgroundColor:'#faf5ff',borderColor:'#9333ea'}}>
+<h3 style={{color:'#9333ea'}}>Leadership Insights</h3>
+<ul>
+{results.leadership.map((l,i)=><li key={i}>{l}</li>)}
+</ul>
+</div>
+
+<div style={{marginTop:'2rem',padding:'2rem',background:'#f8fafc',borderRadius:'0.5rem',textAlign:'center',border:'2px solid #e2e8f0'}}>
+<p style={{fontSize:'1.1rem',fontWeight:600,marginBottom:'0.5rem'}}>Want to go deeper?</p>
+<p className="mb-4 gray">1-to-1 debrief session: £100 | Team workshop: £1,200</p>
+<a href="mailto:alan@changeworking.co.uk" className="btn btn-primary" style={{display:'inline-block',textDecoration:'none'}}>Book a Session</a>
 </div>
 </div>
 </div>
 );
 }
 
-// Name input screen
+// Name input
 if(currentQ===0&&!name){
 return(
 <div className="container">
@@ -244,10 +359,12 @@ return(
 <div className="text-center mb-6">
 <div className="text-3xl burgundy mb-2" style={{fontWeight:700}}>CHANGE WORKING</div>
 <h1 className="text-2xl mb-4" style={{fontWeight:600}}>NLP Metaprogramme Profiler</h1>
+<p className="gray mb-4">Discover your behavioural patterns, communication style, and leadership approach</p>
 </div>
 <div className="mb-4">
-<label className="mb-2 text-sm" style={{display:'block',fontWeight:500}}>Your Name (optional)</label>
-<input type="text" value={name} onChange={(e)=>setName(e.target.value)} placeholder="Enter your name" autoFocus/>
+<label className="mb-2 text-sm" style={{display:'block',fontWeight:500}}>Your Name (Optional)</label>
+<input type="text" value={name} onChange={(e)=>setName(e.target.value)} placeholder="Enter your name"/>
+<p className="text-sm gray" style={{marginTop:'0.5rem'}}>33 questions • 6-7 minutes • Auto-saves progress</p>
 </div>
 <button onClick={()=>setName(name||'Anonymous')} className="btn btn-primary" style={{width:'100%'}}>Start Profiler</button>
 </div>
@@ -255,7 +372,7 @@ return(
 );
 }
 
-// Question screen
+// Questions
 const question=questions[currentQ];
 const progress=((currentQ+1)/questions.length)*100;
 
@@ -270,29 +387,29 @@ return(
 <div className="mb-4">
 <div className="flex justify-between mb-2 text-sm gray">
 <span>Question {currentQ+1} of {questions.length}</span>
-<span>{Math.round(progress)}%</span>
+<span>{Math.round(progress)}% complete</span>
 </div>
 <div className="progress-bar">
 <div className="progress-fill" style={{width:progress+'%'}}/>
 </div>
 </div>
 
-<h2 className="text-xl mb-6" style={{fontWeight:600}}>{question.q}</h2>
+<h2 className="text-xl mb-6" style={{fontWeight:600,lineHeight:'1.5'}}>{question.q}</h2>
 
 <div>
-<label className={`question-option${answers[question.id]==='a'?' selected':''}`} onClick={()=>handleAnswer(question.id,'a')}>
-<input type="radio" name={question.id} checked={answers[question.id]==='a'} onChange={()=>{}} />
-{question.a}
-</label>
-<label className={`question-option${answers[question.id]==='b'?' selected':''}`} onClick={()=>handleAnswer(question.id,'b')}>
-<input type="radio" name={question.id} checked={answers[question.id]==='b'} onChange={()=>{}} />
-{question.b}
-</label>
+<div className={`question-option${answers[question.id]==='a'?' selected':''}`} onClick={()=>handleAnswer(question.id,'a')}>
+<input type="radio" name={question.id} checked={answers[question.id]==='a'} onChange={()=>{}}/>
+<label>{question.a}</label>
+</div>
+<div className={`question-option${answers[question.id]==='b'?' selected':''}`} onClick={()=>handleAnswer(question.id,'b')}>
+<input type="radio" name={question.id} checked={answers[question.id]==='b'} onChange={()=>{}}/>
+<label>{question.b}</label>
+</div>
 {question.c&&(
-<label className={`question-option${answers[question.id]==='c'?' selected':''}`} onClick={()=>handleAnswer(question.id,'c')}>
-<input type="radio" name={question.id} checked={answers[question.id]==='c'} onChange={()=>{}} />
-{question.c}
-</label>
+<div className={`question-option${answers[question.id]==='c'?' selected':''}`} onClick={()=>handleAnswer(question.id,'c')}>
+<input type="radio" name={question.id} checked={answers[question.id]==='c'} onChange={()=>{}}/>
+<label>{question.c}</label>
+</div>
 )}
 </div>
 </div>
